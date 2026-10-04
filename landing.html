@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Seduh – Pesan kopi dari HP, ambil tanpa antre</title>
+<meta name="description" content="Seduh adalah aplikasi pemesanan kopi online. Pilih kopi, atur rasa, bayar, lalu ambil di kedai terdekat atau minta diantar.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,800&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<style>
+  :root{
+    --espresso:#2a1a12;
+    --enamel:#8a5a0e;      /* biru gelas enamel warung kopi */
+    --enamel-dark:#482f12;
+    --caramel:#c98b4b;
+    --foam:#fbfaf7;
+    --sage:#cfe0c8;
+    --ink:#1d1611;
+    --muted:#6d6259;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{font-family:'Instrument Sans',system-ui,sans-serif;color:var(--ink);background:var(--foam);line-height:1.6}
+  h1,h2,h3,.brand{font-family:'Bricolage Grotesque','Instrument Sans',sans-serif;letter-spacing:-.02em;line-height:1.05}
+  a:focus-visible,button:focus-visible{outline:3px solid var(--caramel);outline-offset:3px}
+
+  /* Navbar */
+  .nav-wrap{position:absolute;inset:0 0 auto 0;z-index:10;padding:1.25rem 0}
+  .brand{font-weight:800;font-size:1.6rem;color:var(--foam);text-decoration:none}
+  .nav-link-x{color:var(--foam);text-decoration:none;font-weight:500;margin-left:1.75rem;opacity:.85}
+  .nav-link-x:hover{opacity:1;color:#fff}
+  .btn-seduh{background:var(--caramel);color:var(--espresso);font-weight:600;border:0;border-radius:999px;padding:.8rem 1.6rem;transition:transform .15s,background .15s}
+  .btn-seduh:hover{background:#d99a58;color:var(--espresso);transform:translateY(-2px)}
+  .btn-ghost{border:2px solid rgba(251,250,247,.5);color:var(--foam);border-radius:999px;padding:.75rem 1.5rem;font-weight:600;text-decoration:none;display:inline-block}
+  .btn-ghost:hover{border-color:var(--foam);color:#fff}
+
+  /* Hero */
+  .hero{background:var(--enamel);color:var(--foam);padding:8rem 0 6rem;position:relative;overflow:hidden}
+  .hero::after{ /* tepi gelas enamel: bibir putih di bawah hero */
+    content:"";position:absolute;left:0;right:0;bottom:0;height:14px;background:var(--foam);
+  }
+  .hero h1{font-size:clamp(2.8rem,7vw,5.4rem);font-weight:800;margin-bottom:1.25rem}
+  .hero p.lead{font-size:1.2rem;max-width:30rem;opacity:.9}
+  .hero small{opacity:.75}
+
+  /* Gelas es kopi susu (CSS murni) */
+  .cup-stage{display:flex;flex-direction:column;align-items:center;gap:1.25rem}
+  .glass{position:relative;width:200px;height:300px;border:4px solid rgba(251,250,247,.85);border-top-width:0;border-radius:0 0 46px 46px;
+    clip-path:polygon(0 0,100% 0,92% 100%,8% 100%);background:rgba(255,255,255,.06);overflow:hidden;transition:height .4s ease,width .4s ease}
+  .glass[data-size="s"]{height:230px;width:170px}
+  .glass[data-size="l"]{height:340px;width:220px}
+  .layer{position:absolute;left:0;right:0;bottom:0;animation:pour 1.6s cubic-bezier(.2,.8,.2,1) both}
+  .l-ice{height:100%;background:repeating-linear-gradient(135deg,rgba(255,255,255,.18) 0 22px,rgba(255,255,255,.05) 22px 44px);z-index:3;animation:none}
+  .l-milk{height:34%;background:#f1e3cf;animation-delay:.1s}
+  .l-coffee{height:48%;background:linear-gradient(#5a3520,#3a2012);animation-delay:.7s;z-index:1;bottom:34%}
+  .l-crema{height:6%;background:var(--caramel);bottom:82%;animation-delay:1.2s;z-index:2}
+  @keyframes pour{from{transform:translateY(100%)}to{transform:none}}
+  .straw{position:absolute;width:12px;height:120%;background:var(--caramel);left:62%;top:-30px;transform:rotate(8deg);z-index:4}
+  .size-pick{display:inline-flex;background:rgba(0,0,0,.2);border-radius:999px;padding:4px}
+  .size-pick button{border:0;background:transparent;color:var(--foam);padding:.45rem 1.2rem;border-radius:999px;font-weight:600}
+  .size-pick button[aria-pressed="true"]{background:var(--foam);color:var(--enamel-dark)}
+  .price-tag{font-weight:600;font-size:1.1rem}
+
+  /* Section umum */
+  section{padding:5.5rem 0}
+  .sec-title{font-size:clamp(2rem,4vw,3rem);font-weight:800;margin-bottom:.75rem}
+  .sec-sub{color:var(--muted);max-width:34rem}
+
+  /* Menu */
+  .menu-item{display:flex;gap:1.25rem;align-items:center;padding:1.4rem 0;border-bottom:2px dashed #d9d1c6}
+  .menu-item:first-child{border-top:2px dashed #d9d1c6}
+  .dot{flex:none;width:58px;height:58px;border-radius:50%;display:grid;place-items:center;font-size:1.6rem}
+  .menu-item h3{font-size:1.35rem;margin:0}
+  .menu-item p{margin:0;color:var(--muted);font-size:.95rem}
+  .menu-item .harga{margin-left:auto;font-weight:600;white-space:nowrap}
+  .tag{display:inline-block;background:var(--sage);color:#1f3a1a;border-radius:6px;padding:0 .5rem;font-size:.8rem;font-weight:600;margin-left:.5rem;vertical-align:middle}
+
+  /* Cara kerja – urutan nyata */
+  .steps{background:var(--espresso);color:var(--foam)}
+  .steps .sec-sub{color:#cdbfb2}
+  .step{border-left:4px solid var(--caramel);padding-left:1.25rem;height:100%}
+  .step .n{font-family:'Bricolage Grotesque';font-size:3rem;font-weight:800;color:var(--caramel);line-height:1}
+  .step h3{font-size:1.4rem;margin:.5rem 0}
+  .step p{color:#cdbfb2;margin:0}
+
+  /* Fitur */
+  .fitur{padding:1.5rem;border-radius:20px;background:#fff;border:2px solid #ece5da;height:100%}
+  .fitur:nth-child(odd){border-radius:20px 20px 20px 4px}
+  .fitur .ico{font-size:1.8rem}
+  .fitur h3{font-size:1.2rem;margin:.6rem 0 .3rem}
+  .fitur p{margin:0;color:var(--muted);font-size:.95rem}
+
+  /* CTA */
+  .cta{background:var(--sage);text-align:center}
+  .cta h2{font-size:clamp(2.2rem,5vw,3.6rem);font-weight:800}
+  .store{display:inline-block;background:var(--espresso);color:var(--foam);border-radius:14px;padding:.8rem 1.5rem;text-decoration:none;font-weight:600;margin:.4rem}
+  .store:hover{background:#000;color:#fff}
+  .store span{display:block;font-size:.7rem;font-weight:400;opacity:.8}
+
+  footer{background:var(--espresso);color:#b9aa9b;padding:2.5rem 0;font-size:.9rem}
+  footer a{color:#b9aa9b;margin-left:1.25rem;text-decoration:none}
+  footer a:hover{color:#fff}
+
+  @media (max-width:767px){
+    .nav-link-x{display:none}
+    .hero{padding-top:6.5rem}
+    .menu-item .harga{font-size:.95rem}
+  }
+  @media (prefers-reduced-motion:reduce){
+    .layer{animation:none}.glass,.btn-seduh{transition:none}html{scroll-behavior:auto}
+  }
+</style>
+</head>
+<body>
+
+<header class="nav-wrap">
+  <div class="container d-flex align-items-center justify-content-between">
+    <a class="brand" href="#">Variant Orange Coffe</a>
+    <nav aria-label="Navigasi utama">
+      <a class="nav-link-x" href="#menu">Menu</a>
+      <a class="nav-link-x" href="#cara-kerja">Cara pesan</a>
+      <a class="nav-link-x" href="#fitur">Keunggulan</a>
+      <a class="btn-seduh ms-4 d-none d-sm-inline-block text-decoration-none" href="#unduh">Unduh aplikasi</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <!-- HERO -->
+  <section class="hero">
+    <div class="container">
+      <div class="row align-items-center g-5">
+        <div class="col-lg-7">
+          <h1>Dari kami untuk mewarnai hari kalian.</h1>
+          <p class="lead">Pesan dari Device kamu, atur manis dan es-nya, lalu ambil di kedai terdekat tanpa antre. Atau minta diantar ke meja kerja.</p>
+          <div class="d-flex flex-wrap gap-3 mt-4">
+            <a class="btn-seduh text-decoration-none" href="#unduh">Order your first coffee.</a>
+            <a class="btn-ghost" href="#menu">View menu</a>
+          </div>
+          <p class="mt-4"><small>Gratis ongkir untuk pesanan pertama.</small></p>
+        </div>
+        <div class="col-lg-5">
+          <div class="cup-stage">
+            <div class="glass" id="glass" data-size="m" role="img" aria-label="Ilustrasi segelas es kopi susu">
+              <div class="layer l-milk"></div>
+              <div class="layer l-coffee"></div>
+              <div class="layer l-crema"></div>
+              <div class="layer l-ice"></div>
+              <div class="straw"></div>
+            </div>
+            <div class="size-pick" role="group" aria-label="Pilih ukuran">
+              <button type="button" data-size="s" aria-pressed="false">Kecil</button>
+              <button type="button" data-size="m" aria-pressed="true">Sedang</button>
+              <button type="button" data-size="l" aria-pressed="false">Besar</button>
+            </div>
+            <div class="price-tag">Orange Latte <span id="harga">Rp22.000</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- MENU -->
+  <section id="menu">
+    <div class="container">
+      <div class="row g-5">
+        <div class="col-lg-4">
+          <h2 class="sec-title">Menu yang paling sering dipesan</h2>
+          <p class="sec-sub">Semua bisa diatur: tingkat manis, jumlah es, dan tambahan shot.</p>
+        </div>
+        <div class="col-lg-8">
+          <div class="menu-item">
+            <div class="dot" style="background:#f1e3cf">🧋</div>
+            <div><h3>Variant Orange Latte <span class="tag">Terlaris</span></h3><p>Espresso, susu segar, perasan jeruk manis.</p></div>
+            <div class="harga">Rp22.000</div>
+          </div>
+          <div class="menu-item">
+            <div class="dot" style="background:#e5d3c3">☕</div>
+            <div><h3>Variant Pink Ocean</h3><p>Menggabungkan manisnya susu, dengan segarnya soda.</p></div>
+            <div class="harga">Rp15.000</div>
+          </div>
+          <div class="menu-item">
+            <div class="dot" style="background:var(--sage)">🍵</div>
+            <div><h3>Latte Pandan <span class="tag">Baru</span></h3><p>Espresso, susu panas, sirup pandan buatan kedai.</p></div>
+            <div class="harga">Rp26.000</div>
+          </div>
+          <div class="menu-item">
+            <div class="dot" style="background:#d6e3f0">🫗</div>
+            <div><h3>V60 Single Origin</h3><p>Biji pilihan bulan ini, diseduh manual. Gayo, Kintamani, atau Toraja.</p></div>
+            <div class="harga">Rp30.000</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CARA PESAN -->
+  <section class="steps" id="cara-kerja">
+    <div class="container">
+      <h2 class="sec-title">Pesan dalam tiga langkah</h2>
+      <p class="sec-sub mb-5">Dari buka aplikasi sampai kopi di tangan, rata-rata 8 menit.</p>
+      <div class="row g-4">
+        <div class="col-md-4"><div class="step"><div class="n">1</div><h3>Pilih kopi dan atur rasa</h3><p>Pilih menu, tentukan ukuran, manis, dan es sesuai seleramu.</p></div></div>
+        <div class="col-md-4"><div class="step"><div class="n">2</div><h3>Bayar lewat aplikasi</h3><p>QRIS, GoPay, OVO, DANA, atau kartu. Tidak perlu uang tunai.</p></div></div>
+        <div class="col-md-4"><div class="step"><div class="n">3</div><h3>Ambil atau tunggu diantar</h3><p>Datang saat notifikasi "Kopi siap" muncul, atau pilih antar ke alamatmu.</p></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- KEUNGGULAN -->
+  <section id="fitur">
+    <div class="container">
+      <h2 class="sec-title">Dibuat untuk yang tidak mau menunggu</h2>
+      <p class="sec-sub mb-5">Hal-hal kecil yang bikin pesan kopi jadi lebih mudah.</p>
+      <div class="row g-4">
+        <div class="col-md-6 col-lg-3"><div class="fitur"><div class="ico">⚡</div><h3>Pesan ulang sekali ketuk</h3><p>Kopi favoritmu tersimpan, tinggal pilih dari riwayat.</p></div></div>
+        <div class="col-md-6 col-lg-3"><div class="fitur"><div class="ico">📍</div><h3>Kedai terdekat</h3><p>Lihat kedai yang buka dan perkiraan waktu siapnya.</p></div></div>
+        <div class="col-md-6 col-lg-3"><div class="fitur"><div class="ico">🎁</div><h3>Poin tiap pesanan</h3><p>Kumpulkan poin, tukar jadi kopi gratis di kedai mana pun.</p></div></div>
+        <div class="col-md-6 col-lg-3"><div class="fitur"><div class="ico">👥</div><h3>Pesan bareng kantor</h3><p>Satu tautan, semua orang pilih kopinya, bayar sekali.</p></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="cta" id="unduh">
+    <div class="container">
+      <h2>Kopi pertamamu gratis ongkir.</h2>
+      <p class="sec-sub mx-auto mb-4">Unduh Seduh dan pakai kode <strong>SEDUH1</strong> saat checkout.</p>
+      <a class="store" href="#"><span>Unduh di</span>App Store</a>
+      <a class="store" href="#"><span>Dapatkan di</span>Google Play</a>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="container d-flex flex-wrap justify-content-between">
+    <div>© 2026 Seduh. Semua hak dilindungi.</div>
+    <div><a href="#">Syarat</a><a href="#">Privasi</a><a href="#">Bantuan</a><a href="#">Instagram</a></div>
+  </div>
+</footer>
+
+<script>
+  // Ganti ukuran gelas dan harga
+  const glass = document.getElementById('glass');
+  const harga = document.getElementById('harga');
+  const daftar = { s: 'Rp18.000', m: 'Rp22.000', l: 'Rp27.000' };
+  document.querySelectorAll('.size-pick button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.size-pick button').forEach(b => b.setAttribute('aria-pressed', 'false'));
+      btn.setAttribute('aria-pressed', 'true');
+      glass.dataset.size = btn.dataset.size;
+      harga.textContent = daftar[btn.dataset.size];
+    });
+  });
+</script>
+</body>
+</html>
